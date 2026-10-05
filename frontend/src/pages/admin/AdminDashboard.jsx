@@ -1,23 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../components/common/Button'
+import { getProperties, deleteProperty } from '../../api/api'
 
 function AdminDashboard() {
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const fetchProperties = async () => {
+ const fetchProperties = async () => {
     try {
-      const response = await fetch(
-        'http://127.0.0.1:8000/properties/'
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch properties')
-      }
-
-      const data = await response.json()
+      const data = await getProperties()
       setProperties(data)
     } catch (err) {
       console.error(err)
@@ -41,22 +34,8 @@ function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/properties/${propertyId}`,
-        {
-          method: 'DELETE',
-        }
-      )
+      await deleteProperty(propertyId)
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          result.detail || 'Failed to delete property'
-        )
-      }
-
-      // Remove deleted property immediately from UI
       setProperties((previousProperties) =>
         previousProperties.filter(
           (property) => property.id !== propertyId

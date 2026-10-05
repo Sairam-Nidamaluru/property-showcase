@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import PropertyForm from '../../components/property/PropertyForm'
+import { getProperties, updateProperty } from '../../api/api'
 
 function PropertyEdit() {
   const { id } = useParams()
@@ -15,15 +16,7 @@ function PropertyEdit() {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await fetch(
-          'http://127.0.0.1:8000/properties/'
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch properties')
-        }
-
-        const data = await response.json()
+        const data = await getProperties()
 
         const selectedProperty = data.find(
           (item) => item.id === Number(id)
@@ -42,7 +35,6 @@ function PropertyEdit() {
         setLoading(false)
       }
     }
-
     fetchProperty()
   }, [id])
 
@@ -59,39 +51,15 @@ function PropertyEdit() {
         image_url: formData.image_url,
       }
 
-      console.log('Updating property:', updatedData)
-
-      const response = await fetch(
-        `http://127.0.0.1:8000/properties/${id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedData),
-        }
-      )
-
-      const result = await response.json()
-
-      console.log('Backend response:', result)
-
-      if (!response.ok) {
-        throw new Error(
-          result.detail || 'Failed to update property'
-        )
-      }
+      await updateProperty(id, updatedData)
 
       alert('Property updated successfully!')
-
       navigate('/admin')
     } catch (err) {
       console.error('Update error:', err)
-
       alert(`Failed to update property: ${err.message}`)
     }
   }
-
   // Loading state
   if (loading) {
     return (
